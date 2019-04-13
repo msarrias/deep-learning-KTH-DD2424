@@ -70,7 +70,6 @@ def ReLU(X_, W_1_, b_1_):
 
 def SOFTMAX(X_, W_1_, W_2_, b_1_, b_2_):
     """ 
-    :param s: kxN matrix
     :return p: kxN softmax
     """
     ind_size_n = np.ones((X_.shape[1],1))
@@ -107,18 +106,6 @@ def ComputeCost(X_, Y_, W_1_, W_2_, b_1_, b_2_, lambda_):
     c = cost_function(Y_, P_, W_1_, W_2_, lambda_) 
     return c
 
-def SOFTMAX(X_, W_1_, W_2_, b_1_, b_2_):
-    """ 
-    :param s: kxN matrix
-    :return p: kxN softmax
-    """
-    ind_size_n = np.ones((X_.shape[1],1))
-    H_ = ReLU(X_, W_1_, b_1_)
-    S_2_ = np.matmul(W_2_, H_) + np.matmul(b_2_, ind_size_n.T)
-    p_ =  np.exp(S_2_) / np.matmul(np.ones((1, S_2_.shape[0])), np.exp(S_2_))
-    
-    #same as dividing by np.exp(s_)/ (np.sum(np.exp(s_), axis=0))
-    return p_ , H_
 
 def ComputeAccuracy(X_, y_, W_1_, W_2_, b_1_, b_2_):
     """
