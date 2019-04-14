@@ -62,23 +62,23 @@ def init_two_layers_w_b_param(X_, Y_, m_):
     
     return W_1_, b_1_, W_2_, b_2_
 
-def ReLU(X_, W_1_, b_1_):
+def ReLU(s_1):
     
-    ind_size_n = np.ones((X_.shape[1],1))
-    S_1_ = np.matmul(W_1_, X_) + np.matmul(b_1_, ind_size_n.T)
-    return np.maximum(S_1_, 0)
+    #ind_size_n = np.ones((X_.shape[1],1))
+    #S_1_ = np.matmul(W_1_, X_) + np.matmul(b_1_, ind_size_n.T)
+    h = np.maximum(s_1, 0)
+    return h
 
-def SOFTMAX(X_, W_1_, W_2_, b_1_, b_2_):
+def SOFTMAX(s_):
     """ 
     :return p: kxN softmax
     """
-    ind_size_n = np.ones((X_.shape[1],1))
-    H_ = ReLU(X_, W_1_, b_1_)
-    S_2_ = np.matmul(W_2_, H_) + np.matmul(b_2_, ind_size_n.T)
-    p_ =  np.exp(S_2_) / np.matmul(np.ones((1, S_2_.shape[0])), np.exp(S_2_))
+#     ind_size_n = np.ones((X_.shape[1],1))
+    #S_2_ = np.matmul(W_2_, H_) + np.matmul(b_2_, ind_size_n.T)
+    p_ =  np.exp(s_) / np.matmul(np.ones((1, s_.shape[0])), np.exp(s_))
     
     #same as dividing by np.exp(s_)/ (np.sum(np.exp(s_), axis=0))
-    return p_ , H_
+    return p_
 
 def cross_entropy_loss(Y_, p_):
     """
@@ -100,12 +100,22 @@ def cost_function(Y_, p_, W_1_, W_2_, lambda_):
     J_ = np.sum(cross_entropy_loss(Y_, p_)) / Y_.shape[1] + lambda_*(np.linalg.norm(W_1_) + np.linalg.norm(W_2_))
     return J_
     
-def ComputeCost(X_, Y_, W_1_, W_2_, b_1_, b_2_, lambda_):
+def ComputeCost(s_, Y_, W_1_, W_2_, lambda_):
     
-    P_, _ = SOFTMAX(X_, W_1_, W_2_, b_1_, b_2_)
+    P_= SOFTMAX(s_)
     c = cost_function(Y_, P_, W_1_, W_2_, lambda_) 
     return c
 
+
+def full_forward_and_cost(X_, Y_, W_1_, W_2_, b_1_, b_2_, lambda_):
+    ind_size_n = np.ones((X_.shape[1],1))
+    S_1_ = np.matmul(W_1_, X_) + np.matmul(b_1_, ind_size_n.T)
+    H = ReLU(S_1_)
+    s = np.matmul(W_2_, H) + np.matmul(b_2_, ind_size_n.T)
+    p = SOFTMAX(s)
+    c = cost_function(Y_, p, W_1_, W_2_, lambda_) 
+    
+    return c
 
 def ComputeAccuracy(X_, y_, W_1_, W_2_, b_1_, b_2_):
     """
@@ -115,19 +125,51 @@ def ComputeAccuracy(X_, y_, W_1_, W_2_, b_1_, b_2_):
     :param b_:  K x 1 vector. Bias.
     :return acc: scalar.
     """
-    ind_size_n = np.ones((X_.shape[1],1))
-    P_, _ = SOFTMAX(X_, W_1_, W_2_, b_1_, b_2_)
-    P = np.argmax(P_,axis=0)
-    acc = np.count_nonzero(y_== P) / float(len(P))
+    Npts = X_.shape[1]
+    ind_size_n = np.ones((Npts,1))
+    #S_1 = mxN matrix.
+    S_1 = np.matmul(W_1_, X_) + np.matmul(b_1_, ind_size_n.T)
+    #H = mxN matrix.
+    H = ReLU(S_1)
+    #S_2 = kxN matrix.
+    S_2 = np.matmul(W_2_, H) + np.matmul(b_2_, ind_size_n.T)
+    #P = kxN matrix.
+    P = SOFTMAX(S_2)
+    P_ = np.argmax(P,axis=0)
+    acc = np.count_nonzero(y_== P_) / float(len(P_))
     
     return acc
+
+def MaxRelativeError(g_a, g_n):
+    """
+    :returns max_relative_error: highest relative error among all gradients.
+    After computing the gradients Analitically and numerically.
+    :g_a and g_n should be the same dimension.
+    """
+    max_value = np.zeros(g_a.shape)
+    eps = np.finfo(np.float32).eps
+    absolute_v = np.absolute(g_a) + np.absolute(g_n)
+    
+    for i in range(g_a.shape[0]):
+        for j in range(g_a.shape[1]):
+            max_value[i][j] = max(eps, absolute_v[i][j])
+    
+    max_relative_error = np.amax(np.absolute(g_a-g_n) / max_value)
+    
+    return max_relative_error
+
 
 def ComputeGradsAnalt(X_, Y_, b_1_, b_2_, W_1_, W_2_, lambda_):
 
     Npts = X_.shape[1]
     ind_size_n = np.ones((Npts,1))
+    
     #forward pass:
-    P, H = SOFTMAX(X_, W_1_, W_2_, b_1_, b_2_)
+    S_1_ = np.matmul(W_1_, X_) + np.matmul(b_1_, ind_size_n.T)
+    H = ReLU(S_1_)
+    s = np.matmul(W_2_, H) + np.matmul(b_2_, ind_size_n.T)
+    P = SOFTMAX(s)
+    
     G = -(Y_ - P)
 
     grad_W_2_L = np.matmul(G, H.T) / float(Npts)
@@ -170,35 +212,34 @@ def ComputeGradsNum(X_, Y_, W_1_, W_2_, b_1_, b_2_, h_=1e-5, lambda_=0):
     
     grad_W_2 = np.zeros(W_2_.shape)
     grad_b_2 = np.zeros(b_2_.shape)
-
-    c = ComputeCost(X_, Y_, W_1_, W_2_, b_1_, b_2_, lambda_=0)
+        
+    #forward pass:
+    c = full_forward_and_cost(X_, Y_, W_1_, W_2_, b_1_, b_2_, lambda_)
 
     for i in range(len(b_1_)):
         b_try = copy.deepcopy(b_1_)
         b_try[i] = b_try[i] + h_
-        c2 = ComputeCost(X_, Y_, W_1_, W_2_, b_try, b_2_, lambda_=0)
-
+        c2 = full_forward_and_cost(X_, Y_, W_1_, W_2_, b_try, b_2_, lambda_)
         grad_b_1[i] = (c2-c) / h_
     
     for i in range(len(b_2_)):
         b_try = copy.deepcopy(b_2_)
         b_try[i] = b_try[i] + h_
-        c2 = ComputeCost(X_, Y_, W_1_, W_2_, b_1_, b_try, lambda_=0)
-
+        c2 = full_forward_and_cost(X_, Y_, W_1_, W_2_, b_1_, b_try, lambda_)
         grad_b_2[i] = (c2-c) / h_
         
     for i in range(m):
         for j in range(d):
             W_try = copy.deepcopy(W_1_)
             W_try[i][j] = W_try[i][j] + h_
-            c2 = ComputeCost(X_, Y_, W_try, W_2_, b_1_, b_2_, lambda_=0)
+            c2 = full_forward_and_cost(X_, Y_, W_try, W_2_, b_1_, b_2_, lambda_)
             grad_W_1[i][j] = (c2-c) / h_
     
     for i in range(k):
         for j in range(m):
             W_try = copy.deepcopy(W_2_)
             W_try[i][j] = W_try[i][j] + h_
-            c2 = ComputeCost(X_, Y_, W_1_, W_try, b_1_, b_2_, lambda_=0)
+            c2 = full_forward_and_cost(X_, Y_, W_1_, W_try, b_1_, b_2_, lambda_)
             grad_W_2[i][j] = (c2-c) / h_
             
 
@@ -220,41 +261,145 @@ def ComputeGradsNumSlow(X_, Y_, W_1_, W_2_, b_1_, b_2_, h_=1e-6, lambda_=0):
     for i in range(len(b_1_)):
         b_try = copy.deepcopy(b_1_)
         b_try[i] = b_try[i] - h_
-        c1 = ComputeCost(X_, Y_, W_1_, W_2_, b_try, b_2_, lambda_=0)
+        c1 = full_forward_and_cost(X_, Y_, W_1_, W_2_, b_try, b_2_, lambda_)
         b_try = copy.deepcopy(b_1_)
         b_try[i] = b_try[i] + h_
-        c2 = ComputeCost(X_, Y_, W_1_, W_2_, b_try, b_2_, lambda_=0)
+        c2 = full_forward_and_cost(X_, Y_, W_1_, W_2_, b_try, b_2_, lambda_)
         grad_b_1[i] = (c2-c1) / (2*h_)
 
     for i in range(len(b_2_)):
         b_try = copy.deepcopy(b_2_)
         b_try[i] = b_try[i] - h_
-        c1 = ComputeCost(X_, Y_, W_1_, W_2_, b_1_, b_try, lambda_=0)
+        c1 =full_forward_and_cost(X_, Y_, W_1_, W_2_, b_1_, b_try, lambda_)
         b_try = copy.deepcopy(b_2_)
         b_try[i] = b_try[i] + h_
-        c2 = ComputeCost(X_, Y_, W_1_, W_2_, b_1_, b_try, lambda_=0)
+        c2 = full_forward_and_cost(X_, Y_, W_1_, W_2_, b_1_, b_try, lambda_)
         grad_b_2[i] = (c2-c1) / (2*h_)
         
     for i in range(m):
         for j in range(d):
             W_try = copy.deepcopy(W_1_)
             W_try[i][j] = W_try[i][j] - h_
-            c1 = ComputeCost(X_, Y_, W_try, W_2_, b_1_, b_2_, lambda_=0)
+            c1 = full_forward_and_cost(X_, Y_, W_try, W_2_, b_1_, b_2_, lambda_)
             W_try = copy.deepcopy(W_1_)
             W_try[i][j] = W_try[i][j] + h_
-            c2 = ComputeCost(X_, Y_, W_try, W_2_, b_1_, b_2_, lambda_=0)
+            c2 = full_forward_and_cost(X_, Y_, W_try, W_2_, b_1_, b_2_, lambda_)
             grad_W_1[i][j]= (c2-c1) / (2*h_)
     
     for i in range(k):
         for j in range(m):
             W_try = copy.deepcopy(W_2_)
             W_try[i][j] = W_try[i][j] - h_
-            c1 = ComputeCost(X_, Y_, W_1_, W_try, b_1_, b_2_, lambda_=0)
+            c1 = full_forward_and_cost(X_, Y_, W_1_, W_try, b_1_, b_2_, lambda_)
             W_try =copy.deepcopy(W_2_)
             W_try[i][j] = W_try[i][j] + h_
-            c2 = ComputeCost(X_, Y_, W_1_, W_try, b_1_, b_2_, lambda_=0)
+            c2 = full_forward_and_cost(X_, Y_, W_1_, W_try, b_1_, b_2_, lambda_)
             grad_W_2[i][j]= (c2-c1) / (2*h_)
 
     return grad_b_1, grad_b_2, grad_W_1, grad_W_2
+
+def MiniBatchGD(m_, X_, Y_, y_, X_val, Y_val, y_val, GD_params, lambda_=0):
+    
+    cf_train = []
+    cf_val = []
+    cl_train = []
+    cl_val = []
+    acc_train = []
+    acc_val = []
+
+    W_1, b_1, W_2, b_2 = init_two_layers_w_b_param(X_, Y_, m_)
+
+    for epoch in range(GD_params.n_epochs):
+        for j in range(GD_params.n_batch):
+            j_start = j * GD_params.n_batch
+            j_end = (j + 1) * GD_params.n_batch
+            Xbatch = X_[:, j_start:j_end]
+            Ybatch = Y_[:, j_start:j_end]
+
+            grad_b_1_t, grad_b_2_t, grad_W_1_t, grad_W_2_t = ComputeGradsAnalt(
+                                                        Xbatch, Ybatch, b_1, b_2, W_1, W_2, lambda_)
+
+            W_1 = W_1 - GD_params.eta * grad_W_1_t
+            b_1 = b_1 - GD_params.eta * grad_b_1_t
+            W_2 = W_2 - GD_params.eta * grad_W_2_t
+            b_2 = b_2 - GD_params.eta * grad_b_2_t
+
+        # cost per epoch
+        trainning_cost = full_forward_and_cost(X_, Y_, W_1, W_2, b_1, b_2, lambda_)
+        validation_cost =full_forward_and_cost(X_val, Y_val, W_1, W_2, b_1, b_2, lambda_)
+
+        # # loss per epoch
+        trainning_loss = full_forward_and_cost(X_, Y_, W_1, W_2, b_1, b_2, 0)
+        validation_loss = full_forward_and_cost(X_val, Y_val, W_1, W_2, b_1, b_2, 0)
+
+        cf_train.append(trainning_cost)
+        cf_val.append(validation_cost)
+
+        cl_train.append(trainning_loss)
+        cl_val.append(validation_loss)
+
+        # accuracy per epoch
+        acc_train_ = ComputeAccuracy(X_, y_, W_1, W_2, b_1, b_2)
+        acc_val_ = ComputeAccuracy(X_val, y_val, W_1, W_2, b_1, b_2)
+
+        acc_train.append(acc_train_)
+        acc_val.append(acc_val_)
+
+
+    return W_1, b_1, W_2, b_2, cf_train, cf_val, cl_train, cl_val, acc_train, acc_val
+
+
+def plot_cf_loss_acc(
+                                    validation_list_cf_,
+                                    trainning_list_cf_,
+                                    acc_train_,
+                                    acc_val_,
+                                    cl_train_,
+                                    cl_val_,
+                                    GD_params_,
+                                    lambda_,
+                                    out_filename='none',
+                                    label1 = 'trainning',
+                                    label2 = 'validation'
+                                    ):
+    """
+    plot_validation_trainning_cf_acc plots the loss and accuracy for both, validation and trainning
+    set for a given number of epochs.
+    """
+    t=range(len(validation_list_cf_))
+    pyplot.figure(figsize=(13,5))
+    pyplot.subplots_adjust(wspace=0.3)
+    pyplot.suptitle(f'batch_n = {GD_params_.n_batch}, eta = {GD_params_.eta},lambda = {lambda_}', size =16)
+    pyplot.style.use('seaborn-darkgrid')
+    # sp1
+    pyplot.subplot(131)
+    pyplot.plot(t, validation_list_cf_, '#4363d8', label = label2+' cost')
+    pyplot.plot(t, trainning_list_cf_, '#3cb44b', label = label1+' cost')
+    pyplot.legend(loc='best')
+    pyplot.xlabel('epoch', size = 13.5)
+    pyplot.ylabel('Cost', size = 13.5)
+    pyplot.title('Cost',size = 14)
+    # sp2
+    pyplot.subplot(132)
+    pyplot.plot(t, cl_val_, '#4363d8', label = label2+' loss')
+    pyplot.plot(t, cl_train_, '#3cb44b', label = label1+' loss')
+    pyplot.legend(loc='best')
+    pyplot.xlabel('epoch', size = 13.5)
+    pyplot.ylabel('Loss', size = 13.5)
+    pyplot.title('Loss', size = 14)
+    # sp3
+    pyplot.subplot(133)
+    pyplot.plot(acc_train_,'#3cb44b', label =  label1+' acc')
+    pyplot.plot(acc_val_, '#4363d8',  label= label2+' acc')
+    pyplot.legend(loc='best')
+    pyplot.xlabel('epoch', size = 13.5)
+    pyplot.ylabel('Accuracy', size = 13.5)
+    pyplot.title('Accuracy', size = 14)
+    if out_filename=='none':
+        pyplot.show()
+    else:
+        pyplot.savefig(out_filename)
+        pyplot.show()
+
 
 
