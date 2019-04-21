@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  14 APR 2019 14:38
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  15 APR 2019 17:54
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -588,35 +588,46 @@ LaTeX Font Info:    Try loading font information for U+msb on input line 17.
 (/usr/local/texlive/2018/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-<test1.png, id=4, 939.51pt x 361.35pt>
+<test1.png, id=4, 1084.05pt x 361.35pt>
 File: test1.png Graphic file (type png)
 <use test1.png>
 Package pdftex.def Info: test1.png  used on input line 47.
-(pdftex.def)             Requested size: 657.65251pt x 252.94327pt.
+(pdftex.def)             Requested size: 758.82983pt x 252.94327pt.
+<test2.png, id=6, 1084.05pt x 361.35pt>
+File: test2.png Graphic file (type png)
+<use test2.png>
+Package pdftex.def Info: test2.png  used on input line 56.
+(pdftex.def)             Requested size: 758.82983pt x 252.94327pt.
  [1
 
 {/usr/local/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map} <./test1
 .png>]
-[2] (./assignment2_report.aux) ) 
+<test3.png, id=19, 1084.05pt x 361.35pt>
+File: test3.png Graphic file (type png)
+<use test3.png>
+Package pdftex.def Info: test3.png  used on input line 61.
+(pdftex.def)             Requested size: 758.82983pt x 252.94327pt.
+
+[2 <./test2.png> <./test3.png>] [3] (./assignment2_report.aux) ) 
 Here is how much of TeX's memory you used:
- 13164 strings out of 492649
- 256204 string characters out of 6129622
- 305464 words of memory out of 5000000
- 16808 multiletter control sequences out of 15000+600000
+ 13176 strings out of 492649
+ 256346 string characters out of 6129622
+ 306480 words of memory out of 5000000
+ 16818 multiletter control sequences out of 15000+600000
  12167 words of font info for 49 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  54i,10n,73p,841b,429s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/local/texlive/2018/texmf-dist/fonts/type1
-/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/
-public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/pu
-blic/amsfonts/cm/cmr12.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/publ
-ic/amsfonts/cm/cmr17.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public
-/amsfonts/cm/cmr8.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/am
-sfonts/cm/cmtt10.pfb>
-Output written on assignment2_report.pdf (2 pages, 105865 bytes).
+</usr/local/tex
+live/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texl
+ive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texliv
+e/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/texlive/
+2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/local/texlive/20
+18/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/2018/
+texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
+Output written on assignment2_report.pdf (3 pages, 182701 bytes).
 PDF statistics:
- 41 PDF objects out of 1000 (max. 8388607)
- 28 compressed objects within 1 object stream
+ 48 PDF objects out of 1000 (max. 8388607)
+ 30 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 18 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 28 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -52,7 +52,16 @@ We can verify that the centered difference formula provides more accuracy in app
 \begin{tcolorbox}
 $ii)$The curves for the training and validation loss/cost when using the cyclical learning rates with the default values, that is replicate Figures $3$ and $4$. Also comment on the curves.
 \end{tcolorbox}
-
+\begin{figure}[H]
+	\centerline{\includegraphics[width=180mm,scale=0.7]{test2.png}}
+	\caption{The graph of the training and validation cost, loss and accuracy computed after every epoch. The network was trained with the following parameter settings$:$ \texttt{n\_batch}$=100$ \texttt{eta}$=.01$, \texttt{n\_epochs}$=40$ and  \texttt{lambda}$=1$.}
+	\label{fig:2}
+\end{figure}
+\begin{figure}[H]
+	\centerline{\includegraphics[width=180mm,scale=0.7]{test3.png}}
+	\caption{The graph of the training and validation cost, loss and accuracy computed after every epoch. The network was trained with the following parameter settings$:$ \texttt{n\_batch}$=100$ \texttt{eta}$=.01$, \texttt{n\_epochs}$=40$ and  \texttt{lambda}$=1$.}
+	\label{fig:3}
+\end{figure}
 \begin{tcolorbox}
 $iii)$ State the range of the values you searched for lambda, the number of cycles used for training during the coarse search and the hyper-parameter settings for the 3 best performing networks you
 trained.
